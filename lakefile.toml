@@ -1,0 +1,15 @@
+name = "camelUp"
+version = "0.1.0"
+defaultTargets = ["camelup"]
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.28.0"
+
+[[lean_lib]]
+name = "CamelUp"
+
+[[lean_exe]]
+name = "camelup"
+root = "Main"
