@@ -225,15 +225,21 @@ def step (gs : GameState) (move : Move) : Option GameState :=
                          legBetsPlaced := gs.legBetsPlaced ++ [bet]
                          currentPlayer := advancePlayer gs.currentPlayer gs.numPlayers }
   | .BetRaceWin c =>
-      let bet : RaceBetEntry :=
-        { betType := .Win, camel := c, player := gs.currentPlayer }
-      some { gs with raceBetsWin   := gs.raceBetsWin ++ [bet]
-                     currentPlayer := advancePlayer gs.currentPlayer gs.numPlayers }
+      -- Each player has exactly one win card per camel; can't bet same camel twice.
+      if gs.raceBetsWin.any (fun b => b.player == gs.currentPlayer && b.camel == c) then none
+      else
+        let bet : RaceBetEntry :=
+          { betType := .Win, camel := c, player := gs.currentPlayer }
+        some { gs with raceBetsWin   := gs.raceBetsWin ++ [bet]
+                       currentPlayer := advancePlayer gs.currentPlayer gs.numPlayers }
   | .BetRaceLose c =>
-      let bet : RaceBetEntry :=
-        { betType := .Lose, camel := c, player := gs.currentPlayer }
-      some { gs with raceBetsLose  := gs.raceBetsLose ++ [bet]
-                     currentPlayer := advancePlayer gs.currentPlayer gs.numPlayers }
+      -- Each player has exactly one lose card per camel; can't bet same camel twice.
+      if gs.raceBetsLose.any (fun b => b.player == gs.currentPlayer && b.camel == c) then none
+      else
+        let bet : RaceBetEntry :=
+          { betType := .Lose, camel := c, player := gs.currentPlayer }
+        some { gs with raceBetsLose  := gs.raceBetsLose ++ [bet]
+                       currentPlayer := advancePlayer gs.currentPlayer gs.numPlayers }
   | .PlaceTile sq positive =>
       -- Legal when: sq ≠ 0, sq on-board, no camel there, no tile there.
       if sq == 0 then none
@@ -265,8 +271,12 @@ def legalMoves (gs : GameState) : List Move :=
       CamelColor.all.foldl (fun acc c =>
         if (gs.legBetTiles.getD c.toIdx []).isEmpty then acc
         else acc ++ [Move.BetLeg c]) []
-    let winMoves  := CamelColor.all.map Move.BetRaceWin
-    let loseMoves := CamelColor.all.map Move.BetRaceLose
+    let winMoves  := CamelColor.all.foldl (fun acc c =>
+        if gs.raceBetsWin.any (fun b => b.player == gs.currentPlayer && b.camel == c) then acc
+        else acc ++ [Move.BetRaceWin c]) []
+    let loseMoves := CamelColor.all.foldl (fun acc c =>
+        if gs.raceBetsLose.any (fun b => b.player == gs.currentPlayer && b.camel == c) then acc
+        else acc ++ [Move.BetRaceLose c]) []
     -- M8: tile placement on empty squares (skip sq 0 and occupied/tiled squares).
     let tileMoves :=
       (List.range numSquares).foldl (fun acc sq =>

@@ -442,33 +442,41 @@ theorem step_preserves_valid
         rcases Bool.eq_false_or_eq_true gs.gameOver with h | h
         · simp [step, h] at h_step
         · exact h
-      simp only [step, hno, Bool.false_eq_true, ↓reduceIte, Option.some.injEq] at h_step
-      subst h_step
-      exact {
-        board_size    := h_valid.board_size
-        camel_unique  := h_valid.camel_unique
-        bag_sub       := h_valid.bag_sub
-        bag_each_once := h_valid.bag_each_once
-        scores_size   := h_valid.scores_size
-        tiles_size    := h_valid.tiles_size
-        player_valid  := fun hn => advancePlayer_lt gs.currentPlayer gs.numPlayers hn
-        mods_size     := h_valid.mods_size }
+      by_cases hdup : gs.raceBetsWin.any (fun b => b.player == gs.currentPlayer && b.camel == c) = true
+      · simp [step, hno, hdup] at h_step
+      · simp only [Bool.not_eq_true] at hdup
+        simp only [step, hno, Bool.false_eq_true, ↓reduceIte, hdup, ↓reduceIte,
+                   Option.some.injEq] at h_step
+        subst h_step
+        exact {
+          board_size    := h_valid.board_size
+          camel_unique  := h_valid.camel_unique
+          bag_sub       := h_valid.bag_sub
+          bag_each_once := h_valid.bag_each_once
+          scores_size   := h_valid.scores_size
+          tiles_size    := h_valid.tiles_size
+          player_valid  := fun hn => advancePlayer_lt gs.currentPlayer gs.numPlayers hn
+          mods_size     := h_valid.mods_size }
   | .BetRaceLose c =>
       have hno : gs.gameOver = false := by
         rcases Bool.eq_false_or_eq_true gs.gameOver with h | h
         · simp [step, h] at h_step
         · exact h
-      simp only [step, hno, Bool.false_eq_true, ↓reduceIte, Option.some.injEq] at h_step
-      subst h_step
-      exact {
-        board_size    := h_valid.board_size
-        camel_unique  := h_valid.camel_unique
-        bag_sub       := h_valid.bag_sub
-        bag_each_once := h_valid.bag_each_once
-        scores_size   := h_valid.scores_size
-        tiles_size    := h_valid.tiles_size
-        player_valid  := fun hn => advancePlayer_lt gs.currentPlayer gs.numPlayers hn
-        mods_size     := h_valid.mods_size }
+      by_cases hdup : gs.raceBetsLose.any (fun b => b.player == gs.currentPlayer && b.camel == c) = true
+      · simp [step, hno, hdup] at h_step
+      · simp only [Bool.not_eq_true] at hdup
+        simp only [step, hno, Bool.false_eq_true, ↓reduceIte, hdup, ↓reduceIte,
+                   Option.some.injEq] at h_step
+        subst h_step
+        exact {
+          board_size    := h_valid.board_size
+          camel_unique  := h_valid.camel_unique
+          bag_sub       := h_valid.bag_sub
+          bag_each_once := h_valid.bag_each_once
+          scores_size   := h_valid.scores_size
+          tiles_size    := h_valid.tiles_size
+          player_valid  := fun hn => advancePlayer_lt gs.currentPlayer gs.numPlayers hn
+          mods_size     := h_valid.mods_size }
   | .BetLeg c =>
       have hno : gs.gameOver = false := by
         rcases Bool.eq_false_or_eq_true gs.gameOver with h | h
