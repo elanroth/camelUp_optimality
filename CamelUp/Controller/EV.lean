@@ -62,7 +62,7 @@ instance : ToString MoveEval where
   toString me :=
     let evSign := if me.ev >= 0.0 then "+" else ""
     let pad    := if me.label.length < 22
-                  then String.ofList (List.replicate (22 - me.label.length) ' ')
+                  then String.mk (List.replicate (22 - me.label.length) ' ')
                   else ""
     s!"{me.label}{pad} EV={evSign}{me.ev}"
 
