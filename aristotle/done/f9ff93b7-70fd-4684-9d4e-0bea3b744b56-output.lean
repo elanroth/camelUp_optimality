@@ -1,3 +1,14 @@
+/-
+This file was edited by Aristotle (https://aristotle.harmonic.fun).
+
+Lean version: leanprover/lean4:v4.24.0
+Mathlib version: f897ebcf72cd16f89ab4577d0c826cd14afaafc7
+This project request had uuid: f9ff93b7-70fd-4684-9d4e-0bea3b744b56
+
+To cite Aristotle, tag @Aristotle-Harmonic on GitHub PRs/issues, and add as co-author to commits:
+Co-authored-by: Aristotle (Harmonic) <aristotle-harmonic@harmonic.fun>
+-/
+
 -- Aristotle Batch 3/3: CamelUp.Proofs.Invariants — Roll branch field lemmas
 --
 -- Batch 95717055 proved:
@@ -59,10 +70,36 @@ import CamelUp.Controller.EV
 import CamelUp.Controller.Policy
 import CamelUp.Proofs.Invariants
 
+
 namespace CamelUp.Invariants.RollBatch
 
 open CamelUp CamelUp.Sim CamelUp.EV CamelUp.Policy
 
+/-! ## Small helpers for Roll proofs -/
+
+lemma initialLegBetTiles_size : initialLegBetTiles.size = 5 := by
+  simp [initialLegBetTiles]
+
+lemma scores_size_after_tile (scores : Array Int) (mTileOwner : Option Nat) :
+    (match mTileOwner with
+      | none => scores
+      | some p => awardPlayer scores p 1).size = scores.size := by
+  cases mTileOwner <;> simp [awardPlayer_size]
+
+lemma scores_size_after_leg (scores : Array Int) (ranking : List CamelColor)
+    (bets : List LegBetEntry) :
+    (resolveLegBets scores ranking bets).size = scores.size := by
+  simp [resolveLegBets_scores_size]
+
+lemma scores_size_after_leg_race (scores : Array Int) (ranking : List CamelColor)
+    (winner loser : CamelColor) (legBets : List LegBetEntry)
+    (winBets loseBets : List RaceBetEntry) :
+    (resolveRaceLoseBets
+        (resolveRaceWinBets (resolveLegBets scores ranking legBets) winner winBets)
+        loser loseBets).size = scores.size := by
+  simp [resolveRaceLoseBets_scores_size, resolveRaceWinBets_scores_size, resolveLegBets_scores_size]
+
+/- Aristotle took a wrong turn (reason code: 9). Please try again. -/
 /-- Roll: no color appears twice in the remaining dice bag.
     Arm A (race over, diceBag=[]): count=0 ≤ 1 by simp
     Arm B (leg end, diceBag=CamelColor.all): count ≤ 1 by `cases c <;> decide`
@@ -73,6 +110,7 @@ theorem step_Roll_bag_each_once (gs : GameState) (outcome : DieOutcome) (gs' : G
     ∀ c : CamelColor, gs'.diceBag.count c ≤ 1 := by
   sorry
 
+/- Aristotle took a wrong turn (reason code: 9). Please try again. -/
 /-- Roll: scores array size is preserved.
     Arm A: size = resolveRaceLoseBets(resolveRaceWinBets(resolveLegBets(awardPlayer ...))).size
            = gs.numPlayers by the *_scores_size lemmas + awardPlayer_size + h_valid.scores_size
@@ -85,6 +123,7 @@ theorem step_Roll_scores_size (gs : GameState) (outcome : DieOutcome) (gs' : Gam
     gs'.scores.size = gs'.numPlayers := by
   sorry
 
+/- Aristotle took a wrong turn (reason code: 9). Please try again. -/
 /-- Roll: legBetTiles array still has 5 entries.
     Arm A: legBetTiles = gs.legBetTiles → exact h_valid.tiles_size
     Arm B: legBetTiles = initialLegBetTiles → decide  (CamelColor has 5 constructors)
@@ -95,6 +134,7 @@ theorem step_Roll_tiles_size (gs : GameState) (outcome : DieOutcome) (gs' : Game
     gs'.legBetTiles.size = 5 := by
   sorry
 
+/- Aristotle took a wrong turn (reason code: 9). Please try again. -/
 -- step_Roll_mods_size: proved by batch 95717055
 --   convert h_valid.mods_size using 1; unfold CamelUp.step at h_step; aesop
 
